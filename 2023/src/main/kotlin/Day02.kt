@@ -1,6 +1,6 @@
 class Day02 : AdventSolution() {
-    data class DrawResult(val reds: Int, val greens: Int, val blues: Int)
-    data class GameResult(val id: Int, val draws: List<DrawResult>)
+    data class CubeSet(val reds: Int, val greens: Int, val blues: Int)
+    data class GameResult(val id: Int, val draws: List<CubeSet>)
 
     fun isValidGame(result: GameResult, totalReds: Int, totalGreens: Int, totalBlues: Int): Boolean =
         result.draws.none { drawResult ->
@@ -9,6 +9,13 @@ class Day02 : AdventSolution() {
                     || drawResult.blues > totalBlues
         }
 
+    fun minimumCubeSet(gameResult: GameResult): CubeSet {
+        val minReds = gameResult.draws.maxBy { it.reds }.reds
+        val minGreens = gameResult.draws.maxBy { it.greens }.greens
+        val minBlues = gameResult.draws.maxBy { it.blues }.blues
+        return CubeSet(minReds, minGreens, minBlues)
+    }
+
     fun parseGameResult(str: String): GameResult {
         val (idStr, drawsStr) = str.split(":")
         val id = idStr.filter { it.isDigit() }.toInt()
@@ -16,7 +23,7 @@ class Day02 : AdventSolution() {
             val reds = redCountRegex.find(draw)?.groupValues?.get(1)?.toInt() ?: 0
             val greens = greenCountRegex.find(draw)?.groupValues?.get(1)?.toInt() ?: 0
             val blues = blueCountRegex.find(draw)?.groupValues?.get(1)?.toInt() ?: 0
-            DrawResult(reds, greens, blues)
+            CubeSet(reds, greens, blues)
         }
         return GameResult(id, draws)
     }
@@ -28,7 +35,9 @@ class Day02 : AdventSolution() {
     }
 
     override fun solvePart2(input: List<String>): String {
-        TODO("Not yet implemented")
+        val results = input.map { parseGameResult(it) }
+        val powers = results.map { result -> minimumCubeSet(result) }.map { it.reds * it.greens * it.blues }
+        return powers.sum().toString()
     }
 
     companion object {
