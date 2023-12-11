@@ -25,9 +25,27 @@ class Day11 : AdventSolution() {
         return distances.sum().toString()
     }
 
-    override fun solvePart2(input: List<String>): String {
-        TODO("Not yet implemented")
+    fun solveWithFactor(expansionFactor: Int, input: List<String>): String {
+        val galaxies = input.flatMapIndexed { y, r -> r.mapIndexed { x, c -> if (c == '#') Coord(x, y) else null} }.filterNotNull()
+        val emptyRows = input.mapIndexed { i, r -> if (r.all { it == '.' }) i else null }.filterNotNull()
+        val emptyCols = input[0].indices.filter { i -> input.map { r -> r[i] }.all { it == '.' } }
+
+        val distances = galaxies.flatMap { g1 -> galaxies.map { g2 -> setOf(g1, g2) } }.filter { it.size == 2 }.toSet()
+            .map {
+                val (g1, g2) = it.toList()
+                var d = ((g1.x - g2.x).absoluteValue + (g1.y - g2.y).absoluteValue).toLong()
+                for (x in emptyCols)
+                    if (x in minOf(g1.x, g2.x)..maxOf(g1.x, g2.x))
+                        d += expansionFactor - 1
+                for (y in emptyRows)
+                    if (y in minOf(g1.y, g2.y)..maxOf(g1.y, g2.y))
+                        d += expansionFactor - 1
+                d
+            }
+        return distances.sum().toString()
     }
+
+    override fun solvePart2(input: List<String>): String = solveWithFactor(1000000, input)
 }
 
 fun main() = Day11().run()
